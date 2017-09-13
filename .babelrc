@@ -2,7 +2,8 @@
   "presets": ["es2015"],
   "env": {
     "production": {
-      "presets": ["babili"]
+      "presets": ["babili"],
+      "comments": false
     }
   }
 }

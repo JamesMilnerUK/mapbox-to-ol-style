@@ -46,7 +46,8 @@
     "prepublish": "npm run doc && npm run build",
     "build": "webpack",
     "doc": "documentation readme -s API index.js",
-    "pretest": "webpack --env.test",
+    "pretest": "eslint src & npm run test-bundle",
+    "test-bundle": "webpack --config=./test/webpack.config.js",
     "test": "phantomjs --local-to-remote-url-access=true ./node_modules/mocha-phantomjs-core/mocha-phantomjs-core.js test/index.html spec '{\"useColors\":true, \"ignoreResourceErrors\": true}'"
   },
   "dependencies": {
@@ -56,11 +57,10 @@
     "ol": "^4.3.1"
   },
   "devDependencies": {
+    "webpack": "*",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-preset-babili": "^0.1.4",
-    "babel-preset-env": "^1.6.0",
-    "babel-preset-es2015": "^6.24.1",
     "documentation": "^4.0.0",
     "eslint": "^3.18.0",
     "eslint-config-openlayers": "^7.0.0",
