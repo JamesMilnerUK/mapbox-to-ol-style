@@ -8,12 +8,12 @@ import Style from 'ol/style/style';
 import Fill from 'ol/style/fill';
 import Stroke from 'ol/style/stroke';
 import Circle from 'ol/style/circle';
-import glfun from '@mapbox/mapbox-gl-style-spec/function';
+import {createFunction as glfun} from '@mapbox/mapbox-gl-style-spec/function';
 import createFilter from '@mapbox/mapbox-gl-style-spec/feature_filter';
 import mb2css from 'mapbox-to-css-font';
 import labelgun from 'labelgun/src/labelgun';
 
-var functions = {
+const functions = {
   interpolated: [
     'line-miter-limit',
     'fill-opacity',
@@ -48,7 +48,7 @@ var functions = {
   ]
 };
 
-var defaults = {
+const defaults = {
   'fill-opacity': 1,
   'line-cap': 'butt',
   'line-join': 'miter',
@@ -72,7 +72,7 @@ var defaults = {
   'circle-stroke-color': '#000000'
 };
 
-var types = {
+const types = {
   'Point': 1,
   'MultiPoint': 1,
   'LineString': 2,
@@ -84,7 +84,7 @@ var types = {
 function voidFn() {}
 
 function applyDefaults(properties) {
-  for (var property in defaults) {
+  for (let property in defaults) {
     if (!(property in properties)) {
       properties[property] = defaults[property];
     }
@@ -92,7 +92,7 @@ function applyDefaults(properties) {
 }
 
 function applyLayoutToPaint(layer) {
-  for (var property in layer.layout) {
+  for (let property in layer.layout) {
     if (!layer.paint[property]) {
       layer.paint[property] = layer.layout[property];
     }
@@ -100,24 +100,24 @@ function applyLayoutToPaint(layer) {
 }
 
 function convertToFunctions(properties, type) {
-  var propertySpec = {
+  const propertySpec = {
     function: type
   };
-  for (var i = 0, ii = functions[type].length; i < ii; ++i) {
-    var property = functions[type][i];
+  for (let i = 0, ii = functions[type].length; i < ii; ++i) {
+    let property = functions[type][i];
     if (property in properties) {
       properties[property] = glfun(properties[property], propertySpec);
     }
   }
 }
 
-var fontMap = {};
+const fontMap = {};
 
 function chooseFont(fonts, availableFonts) {
   if (availableFonts) {
-    var font, i, ii;
+    let font, i, ii;
     if (!Array.isArray(fonts)) {
-      var stops = fonts.stops;
+      let stops = fonts.stops;
       if (stops) {
         for (i = 0, ii = stops.length; i < ii; ++i) {
           chooseFont(stops[i][1], availableFonts);
@@ -159,9 +159,9 @@ function preprocess(layer, fonts) {
 
 function resolveRef(layer, glStyleObj) {
   if (layer.ref) {
-    var layers = glStyleObj.layers;
-    for (var i = 0, ii = layers.length; i < ii; ++i) {
-      var refLayer = layers[i];
+    let layers = glStyleObj.layers;
+    for (let i = 0, ii = layers.length; i < ii; ++i) {
+      let refLayer = layers[i];
       if (refLayer.id == layer.ref) {
         layer.type = refLayer.type;
         layer.source = refLayer.source;
@@ -177,31 +177,31 @@ function resolveRef(layer, glStyleObj) {
 }
 
 function getZoomForResolution(resolution, resolutions) {
-  var candidate;
-  var i = 0, ii = resolutions.length;
+  let candidate;
+  let i = 0, ii = resolutions.length;
   for (; i < ii; ++i) {
     candidate = resolutions[i];
     if (candidate < resolution && i + 1 < ii) {
-      var zoomFactor = resolutions[i] / resolutions[i + 1];
+      let zoomFactor = resolutions[i] / resolutions[i + 1];
       return i + Math.log(resolutions[i] / resolution) / Math.log(zoomFactor);
     }
   }
   return ii - 1;
 }
 
-var colorElement = document.createElement('div');
-var colorRegEx = /^rgba?\((.*)\)$/;
-var colorCache = {};
+const colorElement = document.createElement('div');
+const colorRegEx = /^rgba?\((.*)\)$/;
+const colorCache = {};
 
 function colorWithOpacity(color, opacity) {
   if (color && opacity !== undefined) {
-    var colorData = colorCache[color];
+    let colorData = colorCache[color];
     if (!colorData) {
       colorElement.style.color = color;
       document.body.appendChild(colorElement);
-      var colorString = getComputedStyle(colorElement).getPropertyValue('color');
+      let colorString = getComputedStyle(colorElement).getPropertyValue('color');
       document.body.removeChild(colorElement);
-      var colorArray = colorString.match(colorRegEx)[1].split(',').map(Number);
+      let colorArray = colorString.match(colorRegEx)[1].split(',').map(Number);
       if (colorArray.length == 3) {
         colorArray.push(1);
       }
@@ -223,12 +223,12 @@ function deg2rad(degrees) {
   return degrees * Math.PI / 180;
 }
 
-var templateRegEx = /^(.*)\{(.*)\}(.*)$/;
+const templateRegEx = /^(.*)\{(.*)\}(.*)$/;
 
 function fromTemplate(text, properties) {
-  var parts = text.match(templateRegEx);
+  let parts = text.match(templateRegEx);
   if (parts) {
-    var value = properties[parts[2]] || '';
+    let value = properties[parts[2]] || '';
     return parts[1] + value + parts[3];
   } else {
     return text;
@@ -236,8 +236,8 @@ function fromTemplate(text, properties) {
 }
 
 function sortByWidth(a, b) {
-  var extentA = a.getExtent();
-  var extentB = b.getExtent();
+  const extentA = a.getExtent();
+  const extentB = b.getExtent();
   return (extentB[2] - extentB[0]) - (extentA[2] - extentA[0]);
 }
 
@@ -276,7 +276,7 @@ function sortByWidth(a, b) {
 export default function(olLayer, glStyle, source, resolutions, spriteData, spriteImageUrl, fonts) {
   if (!resolutions) {
     resolutions = [];
-    for (var res = 156543.03392804097; resolutions.length < 22; res /= 2) {
+    for (let res = 156543.03392804097; resolutions.length < 22; res /= 2) {
       resolutions.push(res);
     }
   }
@@ -289,9 +289,9 @@ export default function(olLayer, glStyle, source, resolutions, spriteData, sprit
     throw new Error('glStyle version 8 required.');
   }
 
-  var spriteImage;
+  let spriteImage;
   if (spriteImageUrl) {
-    var img = new Image();
+    let img = new Image();
     img.onload = function() {
       spriteImage = img;
       olLayer.changed();
@@ -299,20 +299,21 @@ export default function(olLayer, glStyle, source, resolutions, spriteData, sprit
     img.src = spriteImageUrl;
   }
 
-  var ctx = document.createElement('CANVAS').getContext('2d');
-  var measureCache = {};
+  const ctx = document.createElement('CANVAS').getContext('2d');
+  const measureCache = {};
+
   function wrapText(text, font, em) {
-    var key = em + ',' + font + ',' + text;
-    var lines = measureCache[key];
+    let key = em + ',' + font + ',' + text;
+    let lines = measureCache[key];
     if (!lines) {
       ctx.font = font;
-      var oneEm = ctx.measureText('M').width;
-      var width = oneEm * em;
-      var words = text.split(' ');
-      var line = '';
+      let oneEm = ctx.measureText('M').width;
+      let width = oneEm * em;
+      let words = text.split(' ');
+      let line = '';
       lines = [];
-      for (var i = 0, ii = words.length; i < ii; ++i) {
-        var word = words[i];
+      for (let i = 0, ii = words.length; i < ii; ++i) {
+        let word = words[i];
         if ((ctx.measureText(line + word).width <= width)) {
           line += (line ? ' ' : '') + word;
         } else {
@@ -330,20 +331,21 @@ export default function(olLayer, glStyle, source, resolutions, spriteData, sprit
     return lines;
   }
 
-  var textCache = {};
-  var labels;
-  var gutter;
-  var labelEngine = new labelgun(voidFn, voidFn);
+  let textCache = {};
+  let labels;
+  let gutter;
+  const labelEngine = new labelgun(voidFn, voidFn);
+
   function createIconLabelCombo(iconStyle, textStyle, coord, state, weight) {
-    var pixelRatio = state.pixelRatio;
-    var bottomLeft = [Infinity, Infinity];
-    var topRight = [-Infinity, -Infinity];
-    var bounds = {
+    let pixelRatio = state.pixelRatio;
+    let bottomLeft = [Infinity, Infinity];
+    let topRight = [-Infinity, -Infinity];
+    let bounds = {
       bottomLeft: bottomLeft,
       topRight: topRight
     };
-    var instructions = [];
-    var iconX, iconY, img, imgData, scale, width, height;
+    let instructions = [];
+    let iconX, iconY, img, imgData, scale, width, height;
     if (iconStyle) {
       img = iconStyle.img;
       scale = iconStyle.scale * pixelRatio;
@@ -357,7 +359,7 @@ export default function(olLayer, glStyle, source, resolutions, spriteData, sprit
       topRight[0] = coord[0] + width / 2 * scale;
       topRight[1] = coord[1] + height / 2 * scale;
     }
-    var canvas, labelX, labelY, textKey;
+    let canvas, labelX, labelY, textKey;
     if (textStyle) {
       textKey = textStyle.font + ',' + textStyle.fill + ',' + textStyle.stroke + ',' +
           textStyle.lineWidth + ',' + textStyle.text;
@@ -365,20 +367,20 @@ export default function(olLayer, glStyle, source, resolutions, spriteData, sprit
       if (!canvas) {
         // Render label to a separate canvas, to be reused with ctx.drawImage
         ctx.font = textStyle.font;
-        var lines = textStyle.lines;
-        var lineHeight = ctx.measureText('M').width * 1.5;
-        var textWidth = 0;
-        var textHeight = 0;
-        var i = 0, ii = lines.length;
+        let lines = textStyle.lines;
+        let lineHeight = ctx.measureText('M').width * 1.5;
+        let textWidth = 0;
+        let textHeight = 0;
+        let i = 0, ii = lines.length;
         for (; i < ii; ++i) {
           textWidth = Math.max(textWidth, ctx.measureText(lines[i]).width);
           textHeight += lineHeight;
         }
-        var lineWidth = textStyle.lineWidth;
+        let lineWidth = textStyle.lineWidth;
         canvas = textCache[textKey] = document.createElement('CANVAS');
         canvas.width = Math.ceil((2 * lineWidth + textWidth) * pixelRatio);
         canvas.height = Math.ceil((2 * lineWidth + textHeight) * pixelRatio);
-        var context = canvas.getContext('2d');
+        let context = canvas.getContext('2d');
         context.font = textStyle.font;
         context.textBaseline = 'top';
         context.textAlign = 'center';
@@ -396,13 +398,13 @@ export default function(olLayer, glStyle, source, resolutions, spriteData, sprit
           }
         }
       }
-      var canvasWidth = canvas.width;
-      var canvasHeight = canvas.height;
-      var halfWidth = canvasWidth / 2;
-      var halfHeight = canvasHeight / 2;
-      var textSize = textStyle.textSize * pixelRatio;
-      var anchor = textStyle.anchor;
-      var offset = textStyle.offset;
+      let canvasWidth = canvas.width;
+      let canvasHeight = canvas.height;
+      let halfWidth = canvasWidth / 2;
+      let halfHeight = canvasHeight / 2;
+      let textSize = textStyle.textSize * pixelRatio;
+      let anchor = textStyle.anchor;
+      let offset = textStyle.offset;
       labelX = coord[0] - halfWidth + offset[0] * textSize;
       labelY = coord[1] - halfHeight + offset[1] * textSize;
       if (anchor.indexOf('top') != -1) {
@@ -420,15 +422,15 @@ export default function(olLayer, glStyle, source, resolutions, spriteData, sprit
       topRight[0] = Math.max(topRight[0], labelX + canvasWidth);
       topRight[1] = Math.max(topRight[1], labelY + canvasHeight);
     }
-    var target = state.context.canvas;
+    let target = state.context.canvas;
     if (0 <= topRight[0] && target.width >= bottomLeft[0] &&
         0 <= topRight[1] && target.height >= bottomLeft[1]) {
-      var id = (iconStyle && iconStyle.icon) + ',' + textKey;
+      let id = (iconStyle && iconStyle.icon) + ',' + textKey;
       if (id in labels) {
-        var testId = id;
-        var found = true;
+        let testId = id;
+        let found = true;
         do {
-          var previous = labels[testId][0];
+          let previous = labels[testId][0];
           // when bbox of identical previous label and current label do not overlap,
           // consider label again by using a different id
           if (previous && (previous.bottomLeft[0] <= topRight[0] && previous.topRight[0] >= bottomLeft[0] &&
@@ -465,18 +467,18 @@ export default function(olLayer, glStyle, source, resolutions, spriteData, sprit
     }
   }
 
-  var allLayers = glStyle.layers;
-  var layersBySourceLayer = {};
-  for (var i = 0, ii = allLayers.length; i < ii; ++i) {
-    var layer = allLayers[i];
+  let allLayers = glStyle.layers;
+  let layersBySourceLayer = {};
+  for (let i = 0, ii = allLayers.length; i < ii; ++i) {
+    let layer = allLayers[i];
     if (!layer.layout) {
       layer.layout = {};
     }
     resolveRef(layer, glStyle);
     if (typeof source == 'string' && layer.source == source ||
         source.indexOf(layer.id) !== -1) {
-      var sourceLayer = layer['source-layer'];
-      var layers = layersBySourceLayer[sourceLayer];
+      let sourceLayer = layer['source-layer'];
+      let layers = layersBySourceLayer[sourceLayer];
       if (!layers) {
         layers = layersBySourceLayer[sourceLayer] = [];
       }
@@ -488,37 +490,37 @@ export default function(olLayer, glStyle, source, resolutions, spriteData, sprit
     }
   }
 
-  var iconImageCache = {};
+  let iconImageCache = {};
 
-  var styles = [];
+  let styles = [];
 
-  var styleFunction = function(feature, resolution) {
-    var properties = feature.getProperties();
-    var layers = layersBySourceLayer[properties.layer];
+  let styleFunction = function(feature, resolution) {
+    let properties = feature.getProperties();
+    let layers = layersBySourceLayer[properties.layer];
     if (!layers) {
       return;
     }
-    var zoom = resolutions.indexOf(resolution);
+    let zoom = resolutions.indexOf(resolution);
     if (zoom == -1) {
       zoom = getZoomForResolution(resolution, resolutions);
     }
-    var type = types[feature.getGeometry().getType()];
-    var f = {
+    let type = types[feature.getGeometry().getType()];
+    let f = {
       properties: properties,
       type: type
     };
-    var stylesLength = -1;
-    for (var i = 0, ii = layers.length; i < ii; ++i) {
-      var layerData = layers[i];
-      var layer = layerData.layer;
-      var paint = layer.paint;
+    let stylesLength = -1;
+    for (let i = 0, ii = layers.length; i < ii; ++i) {
+      let layerData = layers[i];
+      let layer = layerData.layer;
+      let paint = layer.paint;
       if (paint.visibility === 'none' || ('minzoom' in layer && zoom < layer.minzoom) ||
           ('maxzoom' in layer && zoom >= layer.maxzoom)) {
         continue;
       }
       if (!layer.filter || layer.filter(f)) {
-        var color, opacity, fill, stroke, strokeColor, style;
-        var index = layerData.index;
+        let color, opacity, fill, stroke, strokeColor, style;
+        let index = layerData.index;
         if (type == 3) {
           if (!('fill-pattern' in paint) && 'fill-color' in paint) {
             opacity = paint['fill-opacity'](zoom, properties);
@@ -561,7 +563,7 @@ export default function(olLayer, glStyle, source, resolutions, spriteData, sprit
           color = !('line-pattern' in paint) && 'line-color' in paint ?
             colorWithOpacity(paint['line-color'](zoom, properties), paint['line-opacity'](zoom, properties)) :
             undefined;
-          var width = paint['line-width'](zoom, properties);
+          let width = paint['line-width'](zoom, properties);
           if (color && width > 0) {
             ++stylesLength;
             style = styles[stylesLength];
@@ -584,14 +586,14 @@ export default function(olLayer, glStyle, source, resolutions, spriteData, sprit
           }
         }
 
-        var iconStyle;
+        let iconStyle;
         if (type == 1 && 'icon-image' in paint) {
-          var iconImage = paint['icon-image'](zoom, properties);
+          let iconImage = paint['icon-image'](zoom, properties);
           if (iconImage) {
-            var icon = fromTemplate(iconImage, properties);
+            let icon = fromTemplate(iconImage, properties);
             style = iconImageCache[icon];
             if (spriteData && spriteImage) {
-              var spriteImageData = spriteData[icon];
+              let spriteImageData = spriteData[icon];
               if (spriteImageData) {
                 iconStyle = {
                   icon: icon,
@@ -609,7 +611,7 @@ export default function(olLayer, glStyle, source, resolutions, spriteData, sprit
         if (type == 1 && 'circle-radius' in paint) {
           // TODO Send circles through createIconLabelCombo
           ++stylesLength;
-          var cache_key = paint['circle-radius'](zoom, properties) + '.' +
+          let cache_key = paint['circle-radius'](zoom, properties) + '.' +
             paint['circle-stroke-color'](zoom, properties) + '.' +
             paint['circle-color'](zoom, properties);
           style = iconImageCache[cache_key];
@@ -630,23 +632,23 @@ export default function(olLayer, glStyle, source, resolutions, spriteData, sprit
           styles[stylesLength] = style;
         }
 
-        var label;
+        let label;
         if ('text-field' in paint) {
-          var textField = paint['text-field'](zoom, properties);
+          let textField = paint['text-field'](zoom, properties);
           label = fromTemplate(textField, properties);
         }
         // TODO Add LineString handling as soon as it's supporte in OpenLayers
-        var textStyle;
+        let textStyle;
         if (label && type !== 2) {
-          var textSize = paint['text-size'](zoom, properties);
-          var font = mb2css(fontMap[paint['text-font'](zoom, properties)], textSize);
-          var textTransform = paint['text-transform'];
+          let textSize = paint['text-size'](zoom, properties);
+          let font = mb2css(fontMap[paint['text-font'](zoom, properties)], textSize);
+          let textTransform = paint['text-transform'];
           if (textTransform == 'uppercase') {
             label = label.toUpperCase();
           } else if (textTransform == 'lowercase') {
             label = label.toLowerCase();
           }
-          var lines = wrapText(label, font, paint['text-max-width'](zoom, properties));
+          let lines = wrapText(label, font, paint['text-max-width'](zoom, properties));
           textStyle = {
             text: label,
             lines: lines,
@@ -671,16 +673,16 @@ export default function(olLayer, glStyle, source, resolutions, spriteData, sprit
             style = styles[stylesLength] = new Style();
           }
           style.setRenderer(function(coords, state) {
-            var canvas = state.context.canvas;
+            let canvas = state.context.canvas;
             if (!gutter) {
-              var pixelRatio = state.pixelRatio;
+              let pixelRatio = state.pixelRatio;
               gutter = [50 * pixelRatio, 20 * pixelRatio];
             }
             if (coords[0] > -gutter[0] && coords[1] > -gutter[1] && coords[0] < canvas.width + gutter[0] && coords[1] < canvas.height + gutter[1]) {
               createIconLabelCombo(iconStyle, textStyle, coords, state, index);
             }
           });
-          var geometry = feature.getGeometry();
+          let geometry = feature.getGeometry();
           if (geometry.getType() == 'Polygon') {
             style.setGeometry(geometry.getInteriorPoint());
           } else if (geometry.getType() == 'MultiPolygon') {
@@ -706,12 +708,12 @@ export default function(olLayer, glStyle, source, resolutions, spriteData, sprit
   function labelSort(a, b) {
     a = labels[a];
     b = labels[b];
-    var weightA = a[2];
-    var weightB = b[2];
-    var boxA = a[0];
-    var boxB = b[0];
-    var distA = Math.pow(boxA.bottomLeft[0], 2) + Math.pow(boxA.bottomLeft[1], 2);
-    var distB = Math.pow(boxB.bottomLeft[0], 2) + Math.pow(boxB.bottomLeft[1], 2);
+    const weightA = a[2];
+    const weightB = b[2];
+    const boxA = a[0];
+    const boxB = b[0];
+    const distA = Math.pow(boxA.bottomLeft[0], 2) + Math.pow(boxA.bottomLeft[1], 2);
+    const distB = Math.pow(boxB.bottomLeft[0], 2) + Math.pow(boxB.bottomLeft[1], 2);
     if (weightA == weightB) {
       return distA - distB;
     } else {
@@ -719,23 +721,27 @@ export default function(olLayer, glStyle, source, resolutions, spriteData, sprit
     }
   }
   olLayer.on('postcompose', function(e) {
-    var context = e.context;
-    var keys = Object.keys(labels);
+
+    const context = e.context;
+    const keys = Object.keys(labels);
     keys.sort(labelSort);
-    var i, ii;
+
+    let i, ii;
     for (i = 0, ii = keys.length; i < ii; ++i) {
-      var args = labels[keys[i]];
+      let args = labels[keys[i]];
       args[2] = 1; // reset weight
       labelEngine.ingestLabel.apply(labelEngine, args);
     }
+
     labelEngine.update();
-    var items = labelEngine.getShown();
+    let items = labelEngine.getShown();
+
     for (i = 0, ii = items.length; i < ii; ++i) {
-      var item = items[i];
-      var instructions = item.labelObject;
-      for (var j = 0, jj = instructions.length; j < jj; ++j) {
-        var instruction = instructions[j];
-        var alpha = context.globalAlpha;
+      let item = items[i];
+      let instructions = item.labelObject;
+      for (let j = 0, jj = instructions.length; j < jj; ++j) {
+        let instruction = instructions[j];
+        let alpha = context.globalAlpha;
         context.translate.apply(context, instruction.translate);
         if (instruction.rotate) {
           context.rotate(instruction.rotate);
@@ -753,7 +759,9 @@ export default function(olLayer, glStyle, source, resolutions, spriteData, sprit
         context.translate.apply(context, instruction.translate.map((t) => -t));
       }
     }
+
   });
+
   olLayer.setStyle(styleFunction);
   return styleFunction;
 }
