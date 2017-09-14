@@ -1,14 +1,15 @@
 'use strict';
 
 const webpack = require('webpack');
+const MinifyPlugin = require('babel-minify-webpack-plugin');
 
 module.exports = function(env) {
 
-  var plugins = [];
+  var plugins = [new MinifyPlugin()];
   var outputFile = './dist/mb2olstyle.js';
 
   if (env && env.test) {
-    outputFile = "./test/mb2olstyle.js";
+    outputFile = './test/mb2olstyle.js';
   }
 
   var config = {
@@ -38,15 +39,7 @@ module.exports = function(env) {
       }
     ],
     module: {
-      loaders: [
-        {
-          test: /\.js$/,
-          loader: 'babel-loader',
-          query: {
-            presets: ['babili']
-          }
-        }
-      ]
+
     }
   }; // End of config
 

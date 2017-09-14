@@ -8,7 +8,7 @@ import Style from 'ol/style/style';
 import Fill from 'ol/style/fill';
 import Stroke from 'ol/style/stroke';
 import Circle from 'ol/style/circle';
-import {createFunction as glfun} from '@mapbox/mapbox-gl-style-spec/function';
+import glfunc from '@mapbox/mapbox-gl-style-spec/function';
 import createFilter from '@mapbox/mapbox-gl-style-spec/feature_filter';
 import mb2css from 'mapbox-to-css-font';
 import labelgun from 'labelgun/src/labelgun';
@@ -106,7 +106,7 @@ function convertToFunctions(properties, type) {
   for (let i = 0, ii = functions[type].length; i < ii; ++i) {
     let property = functions[type][i];
     if (property in properties) {
-      properties[property] = glfun(properties[property], propertySpec);
+      properties[property] = glfunc(properties[property], propertySpec);
     }
   }
 }
@@ -226,7 +226,7 @@ function deg2rad(degrees) {
 const templateRegEx = /^(.*)\{(.*)\}(.*)$/;
 
 function fromTemplate(text, properties) {
-  let parts = text.match(templateRegEx);
+  const parts = text.match(templateRegEx);
   if (parts) {
     let value = properties[parts[2]] || '';
     return parts[1] + value + parts[3];
@@ -273,7 +273,7 @@ function sortByWidth(a, b) {
  * @return {ol.style.StyleFunction} Style function for use in
  * `ol.layer.Vector` or `ol.layer.VectorTile`.
  */
-export default function(olLayer, glStyle, source, resolutions, spriteData, spriteImageUrl, fonts) {
+function applyStyleFunction(olLayer, glStyle, source, resolutions, spriteData, spriteImageUrl, fonts) {
   if (!resolutions) {
     resolutions = [];
     for (let res = 156543.03392804097; resolutions.length < 22; res /= 2) {
@@ -285,7 +285,7 @@ export default function(olLayer, glStyle, source, resolutions, spriteData, sprit
     glStyle = JSON.stringify(glStyle);
   }
   glStyle = JSON.parse(glStyle);
-  if (glStyle.version != 8) {
+  if (glStyle.version !== 8) {
     throw new Error('glStyle version 8 required.');
   }
 
@@ -698,13 +698,16 @@ export default function(olLayer, glStyle, source, resolutions, spriteData, sprit
       return styles;
     }
   };
+
   olLayer.on('change', function() {
     textCache = {};
   });
+
   olLayer.on('precompose', function() {
     labelEngine.reset();
     labels = {};
   });
+
   function labelSort(a, b) {
     a = labels[a];
     b = labels[b];
@@ -720,6 +723,7 @@ export default function(olLayer, glStyle, source, resolutions, spriteData, sprit
       return weightA - weightB;
     }
   }
+  
   olLayer.on('postcompose', function(e) {
 
     const context = e.context;
@@ -763,5 +767,9 @@ export default function(olLayer, glStyle, source, resolutions, spriteData, sprit
   });
 
   olLayer.setStyle(styleFunction);
+  
   return styleFunction;
+
 }
+
+export default applyStyleFunction;

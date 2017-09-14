@@ -26,18 +26,14 @@ module.exports = function(env) {
     plugins: plugins,
     // externals let you tell webpack about external dependencies
     // that shouldn't be resolved by webpack.
-    externals: [
-      {
-        'ol' : 'ol'
-      }
-    ],
+    externals: [],
     module: {
       loaders: [
         {
           test: /\.js$/,
           loader: 'babel-loader',
           query: {
-            presets: ['babili']
+            presets: ['es2015']
           }
         }
       ]

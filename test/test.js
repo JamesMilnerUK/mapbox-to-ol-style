@@ -1,9 +1,9 @@
 import should from 'should/as-function';
-import applyStyleFunction from '../';
 import states from './data/states.json';
 import Feature from 'ol/feature';
 import VectorLayer from 'ol/layer/vector';
 import Polygon from 'ol/geom/polygon';
+import applyStyleFunction from './../';
 
 describe('mapbox-to-ol-style', function() {
 
@@ -13,8 +13,16 @@ describe('mapbox-to-ol-style', function() {
     layer = new VectorLayer();
   });
 
+  it('applyStyleFunction should be defined', function() {
+    should(applyStyleFunction).be.defined;
+    should(applyStyleFunction).be.a.Function();
+    const style = applyStyleFunction(layer, states, 'states');
+    should(style).be.a.Function;
+  });
+
+
   it('creates a style function with all layers of a source', function() {
-    var style = applyStyleFunction(layer, states, 'states');
+    const style = applyStyleFunction(layer, states, 'states');
     should(style).be.a.Function();
     feature.set('PERSONS', 2000000);
     should(style(feature, 1)).be.an.Array();

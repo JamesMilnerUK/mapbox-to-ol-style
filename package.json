@@ -44,7 +44,7 @@
   "license": "BSD-2-Clause",
   "scripts": {
     "prepublish": "npm run doc && npm run build",
-    "build": "webpack",
+    "build": "BABEL_ENV=production webpack",
     "doc": "documentation readme -s API index.js",
     "pretest": "eslint src & npm run test-bundle",
     "test-bundle": "webpack --config=./test/webpack.config.js",
@@ -57,9 +57,10 @@
     "ol": "^4.3.1"
   },
   "devDependencies": {
-    "webpack": "*",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
+    "babel-minify": "^0.2.0",
+    "babel-minify-webpack-plugin": "^0.2.0",
     "babel-preset-babili": "^0.1.4",
     "documentation": "^4.0.0",
     "eslint": "^3.18.0",
@@ -68,6 +69,7 @@
     "mocha": "^3.4.2",
     "mocha-phantomjs-core": "^2.1.1",
     "phantomjs-prebuilt": "^2.1.14",
-    "should": "^11.2.1"
+    "should": "^11.2.1",
+    "webpack": "*"
   }
 }
